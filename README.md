@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/brainbench_wordmark.svg" alt="BrainBench" width="720">
+  <img src="assets/brainbench_wordmark.svg" alt="BrainBench" width="520">
 </p>
 
 <p align="center">
