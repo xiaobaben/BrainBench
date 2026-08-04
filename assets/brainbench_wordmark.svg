@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="150" viewBox="0 0 720 150" role="img" aria-labelledby="title">
   <title id="title">BrainBench</title>
-  <image href="brainbench_logo.png" x="45" y="15" width="87" height="120" preserveAspectRatio="xMidYMid meet"/>
+  <image href="data:image/png;base64," x="45" y="15" width="87" height="120" preserveAspectRatio="xMidYMid meet"/>
   <text x="160" y="108" fill="#000000" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="78" font-weight="900" letter-spacing="-2">BrainBench</text>
 </svg>
