@@ -1,8 +1,13 @@
-<div align="center">
-  
-# BrainBench
+<p align="center">
+  <img src="assets/brainbench_logo.png" alt="BrainBench logo" width="180">
+</p>
 
-_Benchmarking Large Language Models for Comprehensive EEG Understanding_
-</div>
+<h1 align="center">BrainBench</h1>
 
-Open-source code will be available soon.
+<p align="center">
+  <em>Benchmarking Large Language Models for Comprehensive EEG Understanding</em>
+</p>
+
+<p align="center">
+  <strong>Open-source code will be available soon.</strong>
+</p>
