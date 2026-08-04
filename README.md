@@ -1,12 +1,21 @@
-<h1 align="center">
-  <img src="assets/brainbench_logo.png" alt="BrainBench logo" width="150" align="absmiddle">
-  BrainBench
+<div align="center">
+
+<h1>
+  <img
+    src="assets/brainbench_logo.png"
+    alt="BrainBench Logo"
+    width="86"
+    align="absmiddle"
+  >
+  &nbsp;BrainBench
 </h1>
 
-<p align="center">
-  <em>Benchmarking Large Language Models for Comprehensive EEG Understanding</em>
-</p>
+<h3>
+  Benchmarking Large Language Models for Comprehensive EEG Understanding
+</h3>
 
-<p align="center">
-  <strong>Open-source code will be available soon.</strong>
-</p>
+<br>
+
+<strong>Open-source code will be available soon.</strong>
+
+</div>
