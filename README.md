@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img src="assets/brainbench_logo.png" alt="BrainBench logo" width="62" align="absmiddle">
+  <img src="assets/brainbench_logo.png" alt="BrainBench logo" width="150" align="absmiddle">
   BrainBench
 </h1>
 
