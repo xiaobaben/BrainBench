@@ -21,6 +21,8 @@
   &nbsp;|&nbsp;
   <a href="#quickstart">&#128640; Quickstart</a>
   &nbsp;|&nbsp;
+  <a href="#agents">&#129302; Agent</a>
+  &nbsp;|&nbsp;
   <a href="#">&#128218; Citation</a>
 </p>
 <hr>
@@ -211,3 +213,48 @@ python main.py run foundational_analysis --agent codeact
 ```
 
 This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive/Emotion Assessment), or `physiological_integration` (multimodal Physiological Integration). Results are written to `runs/<subset>.json`.
+
+<hr>
+
+<h2 id="agents">&#129302; Custom Agent Integration</h2>
+
+BrainBench can evaluate a user-defined Agent through a minimal adapter in `main.py`. The Agent does not need to inherit a BrainBench class: it only needs to accept the complete `query` string and return its final answer as natural-language text.
+
+### Interface contract
+
+- `query` is the complete task prompt constructed by BrainBench. It contains the relevant data path, optional label path, and task instruction.
+- The user-defined Agent receives `query` and performs its own reasoning, tool use, or code execution.
+- The returned `response` must be a Python `str` containing the Agent's final natural-language answer.
+- `tokens` records the target Agent's token usage. Set it to `0` when token accounting is unavailable.
+
+### 1. Connect your Agent
+
+Edit `run_custom_agent()` in `main.py` and replace the body of `TargetAgent.run()` with the call to your own Agent:
+
+```python
+def run_custom_agent(query: str) -> AgentRunResult:
+    """Send the complete query to the user's Agent and return its result."""
+
+    class TargetAgent:
+        @staticmethod
+        def run(context: str) -> str:
+            # Replace this line with your own Agent implementation.
+            return context
+
+    your_agent = TargetAgent()
+    response = your_agent.run(query)
+
+    return AgentRunResult(response=response, tokens=0)
+```
+
+In a real integration, `TargetAgent.run()` may call any local Agent framework, remote Agent service, or custom reasoning pipeline. Regardless of the implementation, its final return value must be natural-language text.
+
+### 2. Run the evaluation
+
+Select the custom Agent adapter with `--agent custom`:
+
+```bash
+python main.py run foundational_analysis --agent custom
+```
+
+Replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration` to evaluate the same Agent on another subset. BrainBench will construct each query, call `run_custom_agent()`, parse and score the returned response, and save the results to `runs/<subset>.json`.
