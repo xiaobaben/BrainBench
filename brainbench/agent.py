@@ -11,11 +11,13 @@ def build_agent_query(agent_input: Mapping[str, Any]) -> str:
     """Build the canonical natural-language query sent to an Agent."""
 
     parts: list[str] = []
-    for key in ("data_path", "label_path"):
-        if agent_input.get(key):
-            parts.append(f"Load the data file: {agent_input[key]}")
+    if agent_input.get("data_path"):
+        parts.append(f"Load the data file: {agent_input['data_path']}")
+    if agent_input.get("label_path"):
+        parts.append(f"Load the label file: {agent_input['label_path']}")
     parts.append(f"Instruction:\n{agent_input.get('instruction', '')}")
     return "\n\n".join(parts)
+
 
 
 @dataclass(frozen=True)
