@@ -1,0 +1,27 @@
+{
+  "meta_info": {
+    "case_id": "synthetic_signal.npy",
+    "bench_subset": "Foundational Analysis",
+    "difficult": 1.0,
+    "original_dataset": "Synthetic"
+  },
+  "agent_input": {
+    "data_path": "examples/synthetic_smoke/synthetic_signal.npy",
+    "instruction": "Load the synthetic signal and report its mean square value."
+  },
+  "eval_config": {
+    "parser_prompt": "Extract the mean square value from the report. Return only JSON with the key mean_square.",
+    "metrics": [
+      {
+        "metric_id": "mean_square_accuracy",
+        "type": "numeric_check",
+        "target_key": "mean_square",
+        "weight": 100,
+        "params": {
+          "gt_value": 0.5,
+          "tolerance": 0.000001
+        }
+      }
+    ]
+  }
+}

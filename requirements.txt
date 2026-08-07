@@ -1,0 +1,10 @@
+numpy>=1.24
+openai>=1.0
+httpx>=0.27
+jupyter_client>=8.0
+ipykernel>=6.0
+scipy>=1.10
+mne>=1.4
+edfio>=0.4
+wfdb>=4.1
+python-dotenv>=1.0
