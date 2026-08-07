@@ -6,7 +6,7 @@ BrainBench does not redistribute raw EEG/PSG recordings. Users must obtain the d
 
 ## Benchmark case files
 
-The fixed evaluation case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). The current release contains the `foundational_analysis` and `sleep_assessment` cases only. Raw EEG/PSG files are not included there.
+The fixed evaluation case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). Raw EEG/PSG files are not included there.
 
 ## Local data layout
 
