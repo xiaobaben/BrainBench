@@ -104,7 +104,7 @@ BrainBench/
 
 <h2 id="quickstart">&#128640; Quickstart</h2>
 
-<p>Run these commands from the repository root. The current release supports <code>foundational_analysis</code> and <code>sleep_assessment</code>.</p>
+<p>Run these commands from the repository root.</p>
 
 ### 1. Install
 
