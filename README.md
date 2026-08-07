@@ -85,9 +85,9 @@ BrainBench/
 │   ├── sleep_assessment/
 │   │   └── cases/               # evaluation JSON files
 │   ├── neurocognitive_assessment/
-│   │   └── cases/               # reserved for the corresponding release
+│   │   └── cases/               # Neurocognitive Assessment cases
 │   └── physiological_integration/
-│       └── cases/               # reserved for the corresponding release
+│       └── cases/               # Physiological Integration cases
 ├── docker/                      # Docker environments
 │   └── codeact/                 # CodeAct Docker image definition
 ├── examples/                    # examples and offline smoke tests
@@ -104,7 +104,7 @@ BrainBench/
 
 <h2 id="quickstart">&#128640; Quickstart</h2>
 
-<p>Run these commands from the repository root.</p>
+<p>Run these commands from the repository root and use the identifier of the subset you want to operate on.</p>
 
 ### 1. Install
 
@@ -139,31 +139,42 @@ python main.py smoke
 
 ### 4. Download benchmark cases
 
-The fixed case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). They contain the benchmark inputs, parsing instructions, ground truth, and metrics; raw EEG/PSG recordings are not included. The current release contains 950 Foundational Analysis instances and 1,025 Sleep Assessment instances.
+The fixed case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). They contain the benchmark inputs, parsing instructions, ground truth, and metrics; raw EEG/PSG recordings are not included.
 
-Download the Foundational Analysis cases used in this example:
+Install the Hugging Face CLI and download all benchmark cases:
 
 ```bash
 python -m pip install --upgrade huggingface_hub
+hf download xbb083/BrainBench \
+  --repo-type dataset \
+  --local-dir ./benchmarks
+```
+
+To download only the Foundational Analysis cases:
+
+```bash
 hf download xbb083/BrainBench \
   --repo-type dataset \
   --include "foundational_analysis/**" \
   --local-dir ./benchmarks
 ```
 
-The cases are placed under `benchmarks/foundational_analysis/cases/` and should remain unchanged. Download the required raw EEG/PSG data separately; see the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the exact records used by BrainBench, and the required local folder layout.
+For a different individual subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive/Emotion Assessment), or `physiological_integration` (multimodal Physiological Integration). The downloaded files are placed under `benchmarks/<subset>/cases/` and should remain unchanged.
+
+Raw EEG/PSG data must be obtained separately. See the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the records used by BrainBench, and the expected dataset folder names.
 
 ### 5. Prepare data
 
-After obtaining the licensed source data, place the Foundational Analysis records under `downloads/raw/foundational_analysis/original/` as described in the dataset guide, then run:
+The raw datasets do not need to be stored at a fixed location inside the BrainBench repository. The `--data-root` option may point to any existing directory containing the required source-dataset folders. These folders may be placed directly under that directory or inside an optional `original/` subdirectory.
+
+For example, prepare Foundational Analysis with:
 
 ```bash
 python main.py prepare foundational_analysis \
-  --data-root ./downloads/raw/foundational_analysis
+  --data-root /path/to/foundational_analysis_data
 ```
 
-Prepared Foundational Analysis inputs are written to `data/core/`.
-
+To prepare a different subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`, and change `--data-root` to the directory containing that subset's raw datasets. Prepared data is written to the output directory configured for the selected subset; Foundational Analysis, for example, is written to `data/core/`.
 ### 6. Build the CodeAct Docker image
 
 CodeAct executes model-generated analysis code. With `BRAINBENCH_CODEACT_MODE=docker`, the code runs inside an isolated container built from the project image; this is the recommended mode for safer execution and reproducible dependencies. With `BRAINBENCH_CODEACT_MODE=local`, the code runs directly on the host machine without container isolation, so the host must provide the required packages and has a weaker safety boundary.
