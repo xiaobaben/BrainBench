@@ -178,6 +178,12 @@ Prepared inputs are written to `data/core/` for Foundational Analysis and `data/
 
 CodeAct executes model-generated analysis code. With `BRAINBENCH_CODEACT_MODE=docker`, the code runs inside an isolated container built from the project image; this is the recommended mode for safer execution and reproducible dependencies. With `BRAINBENCH_CODEACT_MODE=local`, the code runs directly on the host machine without container isolation, so the host must provide the required packages and has a weaker safety boundary.
 
+Build the image:
+
+```bash
+docker build -t brainbench-codeact:latest docker/codeact
+```
+
 To use Docker mode, set the following variables in `.env`:
 
 ```dotenv
@@ -185,11 +191,6 @@ BRAINBENCH_CODEACT_MODE=docker
 BRAINBENCH_DOCKER_IMAGE=brainbench-codeact:latest
 ```
 
-Then build the image:
-
-```bash
-docker build -t brainbench-codeact:latest docker/codeact
-```
 
 Use `BRAINBENCH_CODEACT_MODE=local` only when Docker is unavailable or direct host execution is intended.
 
