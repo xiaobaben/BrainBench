@@ -159,7 +159,7 @@ hf download xbb083/BrainBench \
   --local-dir ./benchmarks
 ```
 
-For a different individual subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive/Emotion Assessment), or `physiological_integration` (multimodal Physiological Integration). The downloaded files are placed under `benchmarks/<subset>/cases/` and should remain unchanged.
+For a different individual subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`. The downloaded files are placed under `benchmarks/<subset>/cases/` and should remain unchanged.
 
 Raw EEG/PSG data must be obtained separately. See the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the records used by BrainBench, and the expected dataset folder names.
 
