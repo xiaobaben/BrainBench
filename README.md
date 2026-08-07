@@ -126,9 +126,9 @@ cp .env.example .env
 Fill in the model credentials and choose the CodeAct execution mode in `.env`:
 
 ```dotenv
-NEUROBENCH_API_KEY=YOUR_API_KEY
-NEUROBENCH_BASE_URL=https://YOUR_PROVIDER_BASE_URL/v1
-NEUROBENCH_MODEL=YOUR_MODEL_NAME
+BRAINBENCH_API_KEY=YOUR_API_KEY
+BRAINBENCH_BASE_URL=https://YOUR_PROVIDER_BASE_URL/v1
+BRAINBENCH_MODEL=YOUR_MODEL_NAME
 ```
 
 ### 3. Smoke test
@@ -141,38 +141,28 @@ python main.py smoke
 
 The fixed case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). They contain the benchmark inputs, parsing instructions, ground truth, and metrics; raw EEG/PSG recordings are not included. The current release contains 950 Foundational Analysis instances and 1,025 Sleep Assessment instances.
 
-Download all released cases:
+Download the Foundational Analysis cases used in this example:
 
 ```bash
 python -m pip install --upgrade huggingface_hub
 hf download xbb083/BrainBench \
   --repo-type dataset \
+  --include "foundational_analysis/**" \
   --local-dir ./benchmarks
 ```
 
-To download one subset only:
-
-```bash
-SUBSET=foundational_analysis
-hf download xbb083/BrainBench \
-  --repo-type dataset \
-  --include "${SUBSET}/**" \
-  --local-dir ./benchmarks
-```
-
-The cases are placed under `benchmarks/<subset>/cases/` and should remain unchanged. Download the required raw EEG/PSG data separately; see the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the exact records used by BrainBench, and the required local folder layout.
+The cases are placed under `benchmarks/foundational_analysis/cases/` and should remain unchanged. Download the required raw EEG/PSG data separately; see the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the exact records used by BrainBench, and the required local folder layout.
 
 ### 5. Prepare data
 
-After obtaining the licensed source data, place it under `downloads/raw/<subset>/original/` as described in the dataset guide. Choose the subset to prepare and run:
+After obtaining the licensed source data, place the Foundational Analysis records under `downloads/raw/foundational_analysis/original/` as described in the dataset guide, then run:
 
 ```bash
-SUBSET=foundational_analysis  # or sleep_assessment
-python main.py prepare "$SUBSET" \
-  --data-root "./downloads/raw/$SUBSET"
+python main.py prepare foundational_analysis \
+  --data-root ./downloads/raw/foundational_analysis
 ```
 
-Prepared inputs are written to `data/core/` for Foundational Analysis and `data/sleep/` for Sleep Assessment.
+Prepared Foundational Analysis inputs are written to `data/core/`.
 
 ### 6. Build the CodeAct Docker image
 
