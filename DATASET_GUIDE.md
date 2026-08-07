@@ -54,6 +54,5 @@ The current preparation script uses five records from each source dataset and wr
 
 ## Important notes
 
-- The record lists above are the exact inputs currently selected by `prepare_core_test_inputs.py` and `prepare_sleep_test_inputs.py`; they are not the full source datasets.
 - Do not rename the local folders or the source files expected by the preparation scripts.
 - Keep raw datasets outside Git tracking and do not commit them to the public GitHub repository.
