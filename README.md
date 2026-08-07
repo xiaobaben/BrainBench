@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  BrainBench is a benchmark and evaluation framework for comprehensive EEG understanding, evaluating how large language models and agentic systems analyze real-world EEG recordings and produce scientifically grounded conclusions.
+  <b>BrainBench</b> is a benchmark for comprehensive EEG understanding, evaluating how large language models and agentic systems analyze real-world EEG recordings and produce scientifically grounded conclusions.
 </p>
 
 <p align="center">
