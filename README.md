@@ -2,9 +2,9 @@
   <img src="assets/brainbench_wordmark.svg" alt="BrainBench" width="520">
 </p>
 
-<h2 align="center">
+<h3 align="center">
   Benchmarking Large Language Models for Comprehensive EEG Understanding
-</h2>
+</h3>
 
 <br>
 
