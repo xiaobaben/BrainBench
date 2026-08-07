@@ -17,32 +17,40 @@ class EndpointConfig:
     request_timeout_sec: float = 300.0
 
     @classmethod
-    def from_env(cls, prefix: str = "NEUROBENCH") -> "EndpointConfig":
-        """Read endpoint settings without accepting credentials from source code."""
+    def from_env(cls, prefix: str = "BRAINBENCH") -> "EndpointConfig":
+        """Read endpoint settings without accepting credentials from source code.
 
-        key_name = f"{prefix}_API_KEY"
+        ``NEUROBENCH_*`` remains supported as a legacy prefix so existing local
+        environments continue to work after the project rename.
+        """
+
+        def env_value(suffix: str, default: str | None = None) -> str | None:
+            value = os.getenv(f"{prefix}_{suffix}")
+            if value is None and prefix == "BRAINBENCH":
+                value = os.getenv(f"NEUROBENCH_{suffix}")
+            return default if value is None else value
+
         url_name = f"{prefix}_BASE_URL"
         model_name = f"{prefix}_MODEL"
-        protocol_name = f"{prefix}_API_PROTOCOL"
         timeout_name = f"{prefix}_REQUEST_TIMEOUT_SEC"
 
-        base_url = os.getenv(url_name, "").strip()
+        base_url = (env_value("BASE_URL", "") or "").strip()
         if not base_url:
             raise ValueError(f"{url_name} must be set")
 
-        api_key = os.getenv(key_name, "none").strip() or "none"
-        model = os.getenv(model_name, "").strip()
+        api_key = (env_value("API_KEY", "none") or "none").strip() or "none"
+        model = (env_value("MODEL", "") or "").strip()
         if not model:
             raise ValueError(f"{model_name} must be set")
 
         try:
-            timeout = float(os.getenv(timeout_name, "300"))
+            timeout = float(env_value("REQUEST_TIMEOUT_SEC", "300") or "300")
         except ValueError as exc:
             raise ValueError(f"{timeout_name} must be numeric") from exc
         if timeout <= 0:
             raise ValueError(f"{timeout_name} must be positive")
 
-        protocol = os.getenv(protocol_name, "openai").strip().lower()
+        protocol = (env_value("API_PROTOCOL", "openai") or "openai").strip().lower()
         if protocol not in {"openai", "anthropic"}:
             raise ValueError(f"{protocol_name} must be 'openai' or 'anthropic'")
 
