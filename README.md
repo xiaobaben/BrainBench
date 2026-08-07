@@ -28,12 +28,13 @@
 <h2>&#128300; Overview</h2>
 
 <p>
-  BrainBench is built as a unified benchmark for comprehensive EEG understanding. It brings together four complementary subsets—Foundational Analysis, Sleep Assessment, Neurocognitive Assessment, and Physiological Integration—to evaluate how large language models and agentic systems reason over diverse EEG data and tasks.
+  BrainBench evaluates EEG understanding from multiple complementary perspectives through four benchmark subsets:
 </p>
 
-<p>
-  Across these subsets, BrainBench covers <strong>17 datasets</strong>, <strong>172 tasks</strong>, and approximately <strong>4,000 evaluation instances</strong>, providing a broad and structured basis for comparing EEG understanding capabilities.
-</p>
+- **Foundational Analysis:** Core EEG signal understanding and analysis.
+- **Sleep Assessment:** Sleep-related EEG assessment and staging.
+- **Neurocognitive Assessment:** EEG-based assessment of cognitive functions.
+- **Physiological Integration:** Joint reasoning over EEG and physiological information.
 
 <h3>&#128207; Benchmark at a glance</h3>
 
