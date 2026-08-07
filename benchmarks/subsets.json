@@ -1,0 +1,20 @@
+{
+  "subsets": [
+    {
+      "id": "foundational_analysis",
+      "manifest": "foundational_analysis/manifest.json"
+    },
+    {
+      "id": "sleep_assessment",
+      "manifest": "sleep_assessment/manifest.json"
+    },
+    {
+      "id": "neurocognitive_assessment",
+      "manifest": "neurocognitive_assessment/manifest.json"
+    },
+    {
+      "id": "physiological_integration",
+      "manifest": "physiological_integration/manifest.json"
+    }
+  ]
+}

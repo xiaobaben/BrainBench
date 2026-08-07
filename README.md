@@ -165,16 +165,28 @@ Raw EEG/PSG data must be obtained separately. See the [Dataset Access Guide](DAT
 
 ### 5. Prepare data
 
-The raw datasets do not need to be stored at a fixed location inside the BrainBench repository. The `--data-root` option may point to any existing directory containing the required source-dataset folders. These folders may be placed directly under that directory or inside an optional `original/` subdirectory.
+First, obtain the required raw datasets from the official sources listed in the [Dataset Access Guide](DATASET_GUIDE.md). For Foundational Analysis, place the five dataset folders directly under one user-selected `<data-root>`:
 
-For example, prepare Foundational Analysis with:
+```text
+<data-root>/
+├── isruc/
+├── bcic2020-3/
+├── MentalArithmetic/
+├── mumtaz/
+└── seedv/
+```
+
+The folder names are required and are case-sensitive. If these folders are stored inside a directory named `original/`, pass that `original/` directory itself as `<data-root>`.
+
+After the raw data is organized, prepare Foundational Analysis with:
 
 ```bash
 python main.py prepare foundational_analysis \
-  --data-root /path/to/foundational_analysis_data
+  --data-root /path/to/data-root
 ```
 
-To prepare a different subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`, and change `--data-root` to the directory containing that subset's raw datasets. Prepared data is written to the output directory configured for the selected subset; Foundational Analysis, for example, is written to `data/core/`.
+To prepare a different subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`, and pass the corresponding subset's `<data-root>`. Prepared data is written to the output directory configured for the selected subset; Foundational Analysis, for example, is written to `data/core/`.
+
 ### 6. Build the CodeAct Docker image
 
 CodeAct executes model-generated analysis code. With `BRAINBENCH_CODEACT_MODE=docker`, the code runs inside an isolated container built from the project image; this is the recommended mode for safer execution and reproducible dependencies. With `BRAINBENCH_CODEACT_MODE=local`, the code runs directly on the host machine without container isolation, so the host must provide the required packages and has a weaker safety boundary.

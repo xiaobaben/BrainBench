@@ -1,0 +1,11 @@
+{
+  "subset_id": "sleep_assessment",
+  "display_name": "Sleep Assessment",
+  "status": "released",
+  "legacy_name": "NeuroBench-Sleep",
+  "case_root": "cases",
+  "prepare_script": "prepare_sleep_test_inputs.py",
+  "prepared_data_root": "data/sleep",
+  "expected_tasks": 43,
+  "expected_instances": 1025
+}

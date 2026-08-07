@@ -1,6 +1,6 @@
 # BrainBench Dataset Access Guide
 
-This document lists the raw EEG/PSG datasets required by the currently released BrainBench subsets, their official access pages, and the records selected by the BrainBench preparation scripts.
+This document lists the raw EEG/PSG datasets required by BrainBench, their official access pages, and the records selected by the preparation scripts.
 
 BrainBench does not redistribute raw EEG/PSG recordings. Users must obtain the data from the original providers and comply with each dataset's access policy, license, and data-use requirements.
 
@@ -10,27 +10,25 @@ The fixed evaluation case JSON files are published in the [BrainBench Hugging Fa
 
 ## Local data layout
 
-After downloading the source data, organize it as follows:
+Choose one `<data-root>` for each subset and place its required dataset folders directly underneath it. The root directory may be located anywhere on the user's system.
 
 ```text
-downloads/raw/
-├── foundational_analysis/
-│   └── original/
-│       ├── isruc/
-│       ├── bcic2020-3/
-│       ├── MentalArithmetic/
-│       ├── mumtaz/
-│       └── seedv/
-└── sleep_assessment/
-    └── original/
-        ├── isruc/
-        ├── hmc/
-        ├── shhs/
-        ├── mass/
-        └── physionet2018/
+<foundational-data-root>/
+├── isruc/
+├── bcic2020-3/
+├── MentalArithmetic/
+├── mumtaz/
+└── seedv/
+
+<sleep-data-root>/
+├── isruc/
+├── hmc/
+├── shhs/
+├── mass/
+└── physionet2018/
 ```
 
-The preparation scripts also accept the same folders without the intermediate `original/` directory.
+Pass the applicable root directory directly to `--data-root`. If the five dataset folders are stored inside a directory named `original/`, then the path to that `original/` directory is the value of `--data-root`; the preparation scripts do not automatically enter nested directories.
 
 ## Foundational Analysis
 
@@ -60,5 +58,4 @@ The current preparation script uses five records from each source dataset and wr
 
 - The record lists above are the exact inputs currently selected by `prepare_core_test_inputs.py` and `prepare_sleep_test_inputs.py`; they are not the full source datasets.
 - Do not rename the local folders or the source files expected by the preparation scripts.
-- The `neurocognitive_assessment` and `physiological_integration` subsets are still in progress and will receive their dataset lists when their manifests and preparation scripts are released.
-- Keep raw downloads under `downloads/`; do not commit them to the public GitHub repository.
+- Keep raw datasets outside Git tracking and do not commit them to the public GitHub repository.

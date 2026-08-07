@@ -1,0 +1,11 @@
+{
+  "subset_id": "foundational_analysis",
+  "display_name": "Foundational Analysis",
+  "status": "released",
+  "legacy_name": "NeuroBench-Core",
+  "case_root": "cases",
+  "prepare_script": "prepare_core_test_inputs.py",
+  "prepared_data_root": "data/core",
+  "expected_tasks": 40,
+  "expected_instances": 950
+}

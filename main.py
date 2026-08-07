@@ -214,7 +214,7 @@ preparation, set MODE="prepare", choose SUBSET, and provide the matching root:
 MODE = "run"  # "smoke", "prepare", or "run"
 SUBSET = "foundational_analysis"  # or "sleep_assessment" or "neurocognitive_assessment" or "physiological_integration"
 AGENT = "codeact"  # "codeact" or "custom"
-DATA_ROOT = "/data/xbb/NeuroBench/data/core/"  # Raw dataset root for SUBSET; used only by MODE="prepare".
+DATA_ROOT = "/path/to/foundational_analysis_data"  # Direct parent of the raw dataset folders; used only by MODE="prepare".
 
 
 if __name__ == "__main__":

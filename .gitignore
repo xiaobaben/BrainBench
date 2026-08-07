@@ -7,3 +7,9 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.venv/
+.idea/
+runs/
+outputs/
+data/
+benchmarks/*/cases/
