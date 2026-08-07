@@ -79,6 +79,15 @@ def _parser() -> argparse.ArgumentParser:
     run = commands.add_parser("run", help="Evaluate one released subset.")
     run.add_argument("subset", choices=_released_subsets())
     run.add_argument("--agent", choices=("codeact", "custom"), default="codeact")
+    run.add_argument(
+        "--output-path",
+        type=Path,
+        default=None,
+        help=(
+            "Path for the result JSON. Relative paths are resolved from the "
+            "BrainBench project root. Defaults to runs/<subset>.json."
+        ),
+    )
     return parser
 
 
@@ -90,7 +99,10 @@ def _ide_arguments() -> list[str]:
             raise ValueError("Set DATA_ROOT before running MODE='prepare'")
         return ["prepare", SUBSET, "--data-root", DATA_ROOT]
     if MODE == "run":
-        return ["run", SUBSET, "--agent", AGENT]
+        arguments = ["run", SUBSET, "--agent", AGENT]
+        if OUTPUT_PATH:
+            arguments.extend(["--output-path", OUTPUT_PATH])
+        return arguments
     raise ValueError("MODE must be 'smoke', 'prepare', or 'run'")
 
 
@@ -159,7 +171,12 @@ def _run(args: argparse.Namespace) -> int:
         parser_agent=make_json_parser(config),
         workspace_root=PROJECT_ROOT,
     )
-    output_path = PROJECT_ROOT / "runs" / f"{args.subset}.json"
+    output_path = args.output_path.expanduser() if args.output_path else None
+    if output_path is None:
+        output_path = PROJECT_ROOT / "runs" / f"{args.subset}.json"
+    elif not output_path.is_absolute():
+        output_path = PROJECT_ROOT / output_path
+    output_path = output_path.resolve()
     summary = evaluator.run_subset(
         subset_root,
         output_path=output_path,
@@ -215,6 +232,7 @@ MODE = "run"  # "smoke", "prepare", or "run"
 SUBSET = "foundational_analysis"  # or "sleep_assessment" or "neurocognitive_assessment" or "physiological_integration"
 AGENT = "codeact"  # "codeact" or "custom"
 DATA_ROOT = "/path/to/foundational_analysis_data"  # Direct parent of the raw dataset folders; used only by MODE="prepare".
+OUTPUT_PATH = ""  # Optional result JSON path for MODE="run"; relative paths start at the BrainBench project root.
 
 
 if __name__ == "__main__":
