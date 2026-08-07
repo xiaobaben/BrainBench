@@ -64,3 +64,39 @@
     </tr>
   </tbody>
 </table>
+<hr>
+
+<h2>&#128193; Project structure</h2>
+
+```text
+BrainBench/
+├── brainbench/                  # core benchmark package
+│   ├── codeact/                 # CodeAct agent execution modules
+│   ├── agent.py                 # agent interface
+│   ├── cases.py                 # benchmark case loading
+│   ├── config.py                # runtime configuration
+│   ├── evaluator.py             # evaluation pipeline
+│   ├── llm.py                   # LLM request layer
+│   ├── runners.py               # evaluation runners
+│   └── scoring.py               # scoring and aggregation
+├── benchmarks/                  # evaluation cases downloaded from Hugging Face
+│   ├── foundational_analysis/
+│   │   └── cases/               # evaluation JSON files
+│   ├── sleep_assessment/
+│   │   └── cases/               # evaluation JSON files
+│   ├── neurocognitive_assessment/
+│   │   └── cases/               # reserved for the corresponding release
+│   └── physiological_integration/
+│       └── cases/               # reserved for the corresponding release
+├── docker/                      # Docker environments
+│   └── codeact/                 # CodeAct Docker image definition
+├── examples/                    # examples and offline smoke tests
+│   └── synthetic_smoke/
+├── assets/                      # README images and project artwork
+├── main.py                      # command-line entry point
+├── requirements.txt             # Python dependencies
+├── .env.example                 # environment variable template
+└── .gitignore                   # ignored local files
+```
+
+> The `benchmarks/` directory is intentionally shipped without evaluation JSON files. Download the corresponding case files from Hugging Face and place them under `benchmarks/<subset>/cases/` before running an evaluation.
