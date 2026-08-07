@@ -168,9 +168,10 @@ The cases are placed under `benchmarks/<subset>/cases/` and should remain unchan
 
 ### 5. Prepare data
 
-After obtaining the licensed source data, place it under `downloads/raw/<subset>/original/` as described in the dataset guide, then run:
+After obtaining the licensed source data, place it under `downloads/raw/<subset>/original/` as described in the dataset guide. Choose the subset to prepare and run:
 
 ```bash
+SUBSET=foundational_analysis  # or sleep_assessment
 python main.py prepare "$SUBSET" \
   --data-root "./downloads/raw/$SUBSET"
 ```
