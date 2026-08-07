@@ -4,7 +4,7 @@ This document lists the raw EEG/PSG datasets required by BrainBench, their offic
 
 ## Benchmark case files
 
-The fixed evaluation case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). Raw EEG/PSG files are not included there.
+The fixed evaluation case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). 
 
 ## Local data layout
 
