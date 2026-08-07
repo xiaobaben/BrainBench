@@ -129,10 +129,6 @@ Fill in the model credentials and choose the CodeAct execution mode in `.env`:
 NEUROBENCH_API_KEY=YOUR_API_KEY
 NEUROBENCH_BASE_URL=https://YOUR_PROVIDER_BASE_URL/v1
 NEUROBENCH_MODEL=YOUR_MODEL_NAME
-NEUROBENCH_API_PROTOCOL=openai
-NEUROBENCH_REQUEST_TIMEOUT_SEC=300
-BRAINBENCH_CODEACT_MODE=docker
-BRAINBENCH_DOCKER_IMAGE=brainbench-codeact:latest
 ```
 
 ### 3. Smoke test
