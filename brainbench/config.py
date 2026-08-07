@@ -32,6 +32,7 @@ class EndpointConfig:
 
         url_name = f"{prefix}_BASE_URL"
         model_name = f"{prefix}_MODEL"
+        protocol_name = f"{prefix}_API_PROTOCOL"
         timeout_name = f"{prefix}_REQUEST_TIMEOUT_SEC"
 
         base_url = (env_value("BASE_URL", "") or "").strip()
