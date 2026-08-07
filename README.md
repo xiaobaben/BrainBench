@@ -104,7 +104,7 @@ BrainBench/
 
 <h2 id="quickstart">&#128640; Quickstart</h2>
 
-<p>Run these commands from the repository root.</p>
+<p>Run these commands from the repository root. The current release supports <code>foundational_analysis</code> and <code>sleep_assessment</code>.</p>
 
 ### 1. Install
 
@@ -123,7 +123,7 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Set the model credentials and CodeAct mode in `.env`:
+Fill in the model credentials and choose the CodeAct execution mode in `.env`:
 
 ```dotenv
 NEUROBENCH_API_KEY=YOUR_API_KEY
@@ -143,26 +143,54 @@ python main.py smoke
 
 ### 4. Download benchmark cases
 
+The fixed case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). They contain the benchmark inputs, parsing instructions, ground truth, and metrics; raw EEG/PSG recordings are not included. The current release contains 950 Foundational Analysis instances and 1,025 Sleep Assessment instances.
+
+Download all released cases:
+
 ```bash
 python -m pip install --upgrade huggingface_hub
-HF_DATASET_ID="YOUR_ORG/BrainBench-Cases"
+hf download xbb083/BrainBench \
+  --repo-type dataset \
+  --local-dir ./benchmarks
+```
+
+To download one subset only:
+
+```bash
 SUBSET=foundational_analysis
-hf download "$HF_DATASET_ID" \
+hf download xbb083/BrainBench \
   --repo-type dataset \
   --include "${SUBSET}/**" \
   --local-dir ./benchmarks
 ```
 
-The case JSON files should be placed under `benchmarks/<subset>/cases/`. Obtain the licensed raw EEG/PSG data separately and place it under `downloads/raw/<subset>/original/`.
+The cases are placed under `benchmarks/<subset>/cases/` and should remain unchanged. Download the required raw EEG/PSG data separately; see the [Dataset Access Guide](DATASET_GUIDE.md) for official access pages, the exact records used by BrainBench, and the required local folder layout.
 
-### 5. Prepare, build, and run
+### 5. Prepare data
+
+After obtaining the licensed source data, place it under `downloads/raw/<subset>/original/` as described in the dataset guide, then run:
 
 ```bash
-python main.py prepare "$SUBSET" --data-root "./downloads/raw/$SUBSET"
+python main.py prepare "$SUBSET" \
+  --data-root "./downloads/raw/$SUBSET"
+```
+
+Prepared inputs are written to `data/core/` for Foundational Analysis and `data/sleep/` for Sleep Assessment.
+
+### 6. Build the CodeAct Docker image
+
+CodeAct executes model-generated analysis code. With `BRAINBENCH_CODEACT_MODE=docker`, the code runs inside an isolated container built from the project image; this is the recommended mode for safer execution and reproducible dependencies. With `BRAINBENCH_CODEACT_MODE=local`, the code runs directly on the host machine without container isolation, so the host must provide the required packages and has a weaker safety boundary.
+
+```bash
 docker build -t brainbench-codeact:latest docker/codeact
+```
+
+Keep `BRAINBENCH_DOCKER_IMAGE=brainbench-codeact:latest` when using Docker mode. Switch the mode to `local` in `.env` only when Docker is unavailable or direct host execution is intended.
+
+### 7. Run the benchmark
+
+```bash
 python main.py run "$SUBSET" --agent codeact
 ```
 
-Prepared data are written to `data/core/` for Foundational Analysis and `data/sleep/` for Sleep Assessment. Results are saved to `runs/<subset>.json`.
-
-> `neurocognitive_assessment` and `physiological_integration` are reserved for future releases and are not runnable in the current version.
+Set `SUBSET=sleep_assessment` to run the Sleep Assessment subset. Results are written to `runs/<subset>.json`. The `neurocognitive_assessment` and `physiological_integration` subsets are reserved for future releases.
