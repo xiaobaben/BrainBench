@@ -175,9 +175,6 @@ First, obtain the required raw datasets from the official sources listed in the 
 ├── mumtaz/
 └── seedv/
 ```
-
-The folder names are required and are case-sensitive. If these folders are stored inside a directory named `original/`, pass that `original/` directory itself as `<data-root>`.
-
 After the raw data is organized, prepare Foundational Analysis with:
 
 ```bash
