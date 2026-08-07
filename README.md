@@ -187,7 +187,7 @@ Keep `BRAINBENCH_DOCKER_IMAGE=brainbench-codeact:latest` when using Docker mode.
 ### 7. Run the benchmark
 
 ```bash
-python main.py run "$SUBSET" --agent codeact
+python main.py run foundational_analysis --agent codeact
 ```
 
-Set `SUBSET=sleep_assessment` to run the Sleep Assessment subset. Results are written to `runs/<subset>.json`. The `neurocognitive_assessment` and `physiological_integration` subsets are reserved for future releases.
+This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive Assessment), or `physiological_integration` (multimodal Physiological Integration). Results are written to `runs/<subset>.json`.
