@@ -18,13 +18,13 @@
 </p>
 
 <p align="center">
-  <a href="https://arxiv.org/abs/2608.04156">?? arXiv Paper</a>
+  <a href="#">&#128196; ArXiv Paper</a>
   &nbsp;|&nbsp;
-  <a href="#website" title="Website link to be added">?? Website</a>
+  <a href="#">&#127760; Website</a>
   &nbsp;|&nbsp;
-  <a href="#hugging-face" title="Hugging Face link to be added">?? Hugging Face</a>
+  <a href="#">&#129303; Hugging Face</a>
   &nbsp;|&nbsp;
-  <a href="#quickstart">?? Quickstart</a>
+  <a href="#">&#128640; Quickstart</a>
   &nbsp;|&nbsp;
-  <a href="#citation">?? Citation</a>
+  <a href="#">&#128218; Citation</a>
 </p>
