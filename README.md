@@ -214,6 +214,16 @@ python main.py run foundational_analysis --agent codeact
 
 This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive/Emotion Assessment), or `physiological_integration` (multimodal Physiological Integration). Results are written to `runs/<subset>.json`.
 
+To choose a different result JSON path, pass `--output-path`:
+
+```bash
+python main.py run foundational_analysis \
+  --agent codeact \
+  --output-path runs/foundational_codeact.json
+```
+
+Relative output paths are resolved from the BrainBench project root. If the option is omitted, the default remains `runs/<subset>.json`. When running `main.py` directly from an IDE, set `OUTPUT_PATH` in the IDE configuration block at the bottom of `main.py`.
+
 <hr>
 
 <h2 id="agents">&#129302; Custom Agent Integration</h2>
