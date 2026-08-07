@@ -201,4 +201,4 @@ Use `BRAINBENCH_CODEACT_MODE=local` only when Docker is unavailable or direct ho
 python main.py run foundational_analysis --agent codeact
 ```
 
-This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive Assessment), or `physiological_integration` (multimodal Physiological Integration). Results are written to `runs/<subset>.json`.
+This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment` (Sleep Assessment), `neurocognitive_assessment` (Neurocognitive/Emotion Assessment), or `physiological_integration` (multimodal Physiological Integration). Results are written to `runs/<subset>.json`.
