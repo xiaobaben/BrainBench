@@ -212,7 +212,11 @@ python main.py run foundational_analysis --agent codeact
 
 This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`.
 
-To choose a different result JSON path, pass `--output-path`:
+<hr>
+
+<h2 id="audit-and-logs">&#128203; Audit and logs</h2>
+
+Results are written to `runs/<subset>.json` by default. To choose a different path, pass `--output-path`:
 
 ```bash
 python main.py run foundational_analysis \
@@ -220,7 +224,16 @@ python main.py run foundational_analysis \
   --output-path runs/foundational_codeact.json
 ```
 
-Relative output paths are resolved from the BrainBench project root. If the option is omitted, the default remains `runs/<subset>.json`. When running `main.py` directly from an IDE, set `OUTPUT_PATH` in the IDE configuration block at the bottom of `main.py`.
+Relative paths are resolved from the BrainBench project root. When running `main.py` directly from an IDE, set `OUTPUT_PATH` in the configuration block at the bottom of `main.py`.
+
+The result JSON is updated after every completed instance and contains:
+
+- **`experiment`**: subset, model roles, execution mode, start and finish times, and Docker configuration when used.
+- **`instances`**: case identifiers, source JSON, Agent response, parser output, scores, and metric details.
+- **`instances[].sandbox`**: CodeAct policy, iteration trace, API attempts and retries, termination status, and runtime audit data when available.
+- **`instances[].artifact_manifest`**: generated file name, size, SHA-256 digest, and scoring status.
+- **`instances[].token_usage`, `timing_sec`, and `errors`**: per-instance resource usage, execution timing, and failure details.
+- **`summary`**: planned and completed instances, aggregate score, failure categories, metric summaries, token usage, and wall-clock timing.
 
 <hr>
 
