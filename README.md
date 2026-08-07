@@ -4,11 +4,6 @@
   Benchmarking LLMs for Comprehensive EEG Understanding
 </h2>
 <br>
-
-<p align="center">
-  <strong>Open-source code will be available soon.</strong>
-</p>
-
 <p align="center">
   <img src="assets/intro.png" alt="BrainBench overview" width="100%">
 </p>
