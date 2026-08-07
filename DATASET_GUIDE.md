@@ -2,8 +2,6 @@
 
 This document lists the raw EEG/PSG datasets required by BrainBench, their official access pages, and the records selected by the preparation scripts.
 
-BrainBench does not redistribute raw EEG/PSG recordings. Users must obtain the data from the original providers and comply with each dataset's access policy, license, and data-use requirements.
-
 ## Benchmark case files
 
 The fixed evaluation case JSON files are published in the [BrainBench Hugging Face dataset](https://huggingface.co/datasets/xbb083/BrainBench). Raw EEG/PSG files are not included there.
