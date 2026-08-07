@@ -26,7 +26,7 @@ Choose one `<data-root>` for each subset and place its required dataset folders 
 └── physionet2018/
 ```
 
-Pass the applicable root directory directly to `--data-root`. If the five dataset folders are stored inside a directory named `original/`, then the path to that `original/` directory is the value of `--data-root`; the preparation scripts do not automatically enter nested directories.
+Pass the applicable root directory directly to `--data-root`. 
 
 ## Foundational Analysis
 
