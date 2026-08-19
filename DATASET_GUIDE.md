@@ -186,8 +186,6 @@ The current preparation script uses five records from each source dataset and wr
 
 ## Neurocognitive Assessment
 
-The current preparation script uses five records from each source dataset and writes standardized files to `data/emotion/`.
-
 ```text
 <emotion-data-root>/
 ├── FACED/
@@ -293,6 +291,15 @@ The current preparation script uses five records from each source dataset and wr
         └── MPDDF_raw_06_Annotation.txt
 ```
 
+Prepare the subset with:
+
+```bash
+python main.py prepare neurocognitive_assessment \
+  --data-root /path/to/emotion-data-root
+```
+
+The current preparation script uses five records from each source dataset and writes standardized files to `data/emotion/`.
+
 | Dataset | Official access | Records used by BrainBench | Local folder |
 |---|---|---|---|
 | FACED | [FACED](https://www.synapse.org/Synapse:syn50614194/files/) | `sub000.pkl` … `sub004.pkl` | `FACED/` |
@@ -301,8 +308,6 @@ The current preparation script uses five records from each source dataset and wr
 | MPD-DF | [MPD-DF](https://figshare.com/articles/dataset/MPD-DF_Multimodal_Phenotyping_Dataset_of_Driving_Fatigue_--_The_Raw_Dataset_and_Questionnaire_Information/28455737) | Subjects `01`, `02`, `03`, `04`, and `06`, with Annotation, EEG, and PSG files | `MPD-DF/` |
 
 ## Physiological Integration
-
-The preparation workflow uses five records from each source dataset and writes standardized files to `data/multi/`.
 
 ```text
 <multi-data-root>/
@@ -387,6 +392,15 @@ The preparation workflow uses five records from each source dataset and writes s
         ├── VP004.zip
         └── VP005.zip
 ```
+
+Prepare the subset with:
+
+```bash
+python main.py prepare physiological_integration \
+  --data-root /path/to/multi-data-root
+```
+
+The preparation workflow uses five records from each source dataset and writes standardized files to `data/multi/`.
 
 | Dataset | Official access | Records used by BrainBench | Local folder |
 |---|---|---|---|
