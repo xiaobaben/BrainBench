@@ -70,7 +70,6 @@ Choose one `<data-root>` for each subset and place its required dataset folders 
 ```
 For Foundational Analysis, the preparation script reads the ISRUC `.rec` files. The corresponding `.txt` and `.xlsx` files may remain in the subject directories but are not used by this subset. Labels required by BCI Competition 2020 Track 3 are stored inside the corresponding `.mat` files.
 
-<<<<<<< Updated upstream
 Prepare the subset with:
 
 ```bash
@@ -163,27 +162,6 @@ Prepare the subset with:
 ```bash
 python main.py prepare sleep_assessment \
   --data-root /path/to/sleep-data-root
-=======
-<sleep-data-root>/
-├── isruc/
-├── hmc/
-├── shhs/
-├── mass/
-└── physionet2018/
-
-<emotion-data-root>/
-├── FACED/
-├── REFED/
-├── COG-BCI/
-└── MPD-DF/
-
-<multi-data-root>/
-├── DEAP/
-├── SEED-VIG/
-├── SEED-VII/
-├── SHHS/
-└── simultaneous_EEG-NIRS/
->>>>>>> Stashed changes
 ```
 
 
