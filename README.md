@@ -131,7 +131,13 @@ Fill in the model credentials and choose the CodeAct execution mode in `.env`:
 BRAINBENCH_API_KEY=YOUR_API_KEY
 BRAINBENCH_BASE_URL=https://YOUR_PROVIDER_BASE_URL/v1
 BRAINBENCH_MODEL=YOUR_MODEL_NAME
+
+PARSER_API_KEY=YOUR_API_KEY
+PARSER_BASE_URL=https://YOUR_PROVIDER_BASE_URL/v1
+PARSER_MODEL=YOUR_MODEL_NAME
 ```
+
+`BRAINBENCH_MODEL` is the **target model** being evaluated through CodeAct or a custom Agent. `PARSER_MODEL` is the **parser model** that converts the Agent's natural-language response into structured fields for scoring; it is also used by semantic and VLM judge metrics.
 
 ### 3. Smoke test
 
@@ -211,6 +217,14 @@ python main.py run foundational_analysis --agent codeact
 ```
 
 This command runs the Foundational Analysis subset with the built-in CodeAct agent. To run another subset, replace `foundational_analysis` with `sleep_assessment`, `neurocognitive_assessment`, or `physiological_integration`.
+
+To run a single case, pass its JSON path:
+
+```bash
+python main.py run \
+  --case-path benchmarks/foundational_analysis/cases/case1/case1_01.json \
+  --agent codeact
+```
 
 <h2 id="agents">&#129302; Custom Agent Integration</h2>
 
