@@ -13,11 +13,43 @@ from typing import Any, Callable, Dict, Mapping, Optional
 
 from .agent import AgentRunResult, AgentRunner, build_agent_query
 from .cases import is_case_json, iter_case_paths, load_case_json, validate_case_json
-from .scoring import ScoreContext, score_metric
+from .codeact.transport import is_retryable_api_error
+from .scoring import (
+    ScoreContext,
+    _is_api_infrastructure_error as _is_scoring_api_infrastructure_error,
+    score_metric,
+)
 
 
 ParserAgent = Callable[[str, str], Dict[str, Any]]
 logger = logging.getLogger("BrainBench")
+
+
+def _api_infrastructure_error(phase: str, exc: BaseException) -> str:
+    return f"api_infrastructure_error: {phase}: {exc}"
+
+
+def _is_api_infrastructure_error(exc: BaseException) -> bool:
+    """Match NeuroBench's transport and CodeAct infrastructure classification."""
+
+    if getattr(exc, "is_api_infrastructure_error", False):
+        return True
+    if getattr(exc, "category", None) in {
+        "api_timeout",
+        "api_connection_error",
+        "api_rate_limit",
+        "api_server_error",
+        "api_infrastructure_error",
+    }:
+        return True
+    if is_retryable_api_error(exc):
+        return True
+    cause = getattr(exc, "__cause__", None) or getattr(exc, "__context__", None)
+    return bool(
+        cause is not None
+        and cause is not exc
+        and _is_api_infrastructure_error(cause)
+    )
 
 
 class NeuroBenchEvaluator:
@@ -86,6 +118,9 @@ class NeuroBenchEvaluator:
                 run_context: dict[str, Any] = {"instance_id": resolved_id}
                 if getattr(self.agent_runner, "evaluation_mode", "agent") == "codeact":
                     run_context["agent_input"] = agent_input
+                    run_context["expected_missing_data_path"] = bool(
+                        meta.get("expected_missing_data_path", False)
+                    )
                 result = self.agent_runner.run_with_usage(
                     query,
                     run_context,
@@ -100,7 +135,15 @@ class NeuroBenchEvaluator:
                 agent_output = str(result)
             target_ok = True
         except Exception as exc:
-            errors.append(f"agent_error: {exc}")
+            if _is_api_infrastructure_error(exc):
+                logger.warning(
+                    "API infrastructure failed during target for case %s: %s",
+                    resolved_id,
+                    exc,
+                )
+                errors.append(_api_infrastructure_error("target", exc))
+            else:
+                errors.append(f"agent_error: {exc}")
             sandbox_audit = getattr(self.agent_runner, "last_audit", None)
         timing["target"] = time.perf_counter() - target_start
 
@@ -113,7 +156,15 @@ class NeuroBenchEvaluator:
                     raise TypeError("parser must return a dict")
                 parser_output = parser_result
             except Exception as exc:
-                errors.append(f"parser_error: {exc}")
+                if _is_api_infrastructure_error(exc):
+                    logger.warning(
+                        "API infrastructure failed during parser for case %s: %s",
+                        resolved_id,
+                        exc,
+                    )
+                    errors.append(_api_infrastructure_error("parser", exc))
+                else:
+                    errors.append(f"parser_error: {exc}")
             timing["parser"] = time.perf_counter() - parser_start
 
         metrics = [item for item in eval_config.get("metrics", []) if isinstance(item, Mapping)]
@@ -124,13 +175,27 @@ class NeuroBenchEvaluator:
         case_context = ScoreContext(
             workspace_root=self.context.workspace_root,
             artifact_root=self.context.artifact_root,
+            strict_artifact_paths=(
+                str(getattr(self.agent_runner, "execution_mode", "")).lower() == "docker"
+            ),
             semantic_judge=self._timed_judge(self.context.semantic_judge, timing, "judge"),
             vlm_judge=self._timed_judge(self.context.vlm_judge, timing, "vlm"),
         )
         if target_ok:
             for metric in metrics:
                 metric_id = str(metric.get("metric_id", "unknown_metric"))
-                result = score_metric(parser_output, agent_output, metric, case_context)
+                try:
+                    result = score_metric(parser_output, agent_output, metric, case_context)
+                except Exception as exc:
+                    if _is_scoring_api_infrastructure_error(exc):
+                        logger.warning(
+                            "API infrastructure failed during scoring for case %s: %s",
+                            resolved_id,
+                            exc,
+                        )
+                        errors.append(_api_infrastructure_error("scoring", exc))
+                        break
+                    raise
                 details[metric_id] = {
                     **result.as_dict(),
                     "metric_type": metric.get("type"),

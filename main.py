@@ -19,7 +19,8 @@ from typing import Any, Callable, Sequence
 from dotenv import load_dotenv
 
 from brainbench import AgentRunner, AgentRunResult, EndpointConfig, NeuroBenchEvaluator
-from brainbench.llm import make_json_parser
+from brainbench.cases import load_case_json
+from brainbench.llm import make_json_parser, make_semantic_judge, make_vlm_judge
 from brainbench.runners import CodeActAgentRunner
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -33,12 +34,15 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 def run_custom_agent(query: str) -> AgentRunResult:
     """Send the complete query to the user's Agent and return its result."""
 
-    # response = your_agent.run(query)
-    # return AgentRunResult(response=response, tokens=0)
+    class TargetAgent:
+        @staticmethod
+        def run(context):
+            return context
 
-    raise NotImplementedError(
-        "Edit run_custom_agent() in main.py and return AgentRunResult(response=..., tokens=...)"
-    )
+    your_agent = TargetAgent()
+    response = your_agent.run(query)
+
+    return AgentRunResult(response=response, tokens=0)
 
 
 def _subsets() -> dict[str, dict[str, Any]]:
@@ -76,8 +80,14 @@ def _parser() -> argparse.ArgumentParser:
     prepare.add_argument("subset", choices=_released_subsets())
     prepare.add_argument("--data-root", required=True, type=Path)
 
-    run = commands.add_parser("run", help="Evaluate one released subset.")
-    run.add_argument("subset", choices=_released_subsets())
+    run = commands.add_parser("run", help="Evaluate one released subset or one case.")
+    run.add_argument("subset", nargs="?", choices=_released_subsets())
+    run.add_argument(
+        "--case-path",
+        type=Path,
+        default=None,
+        help="Run only the case JSON at this path; the subset is read from the case.",
+    )
     run.add_argument("--agent", choices=("codeact", "custom"), default="codeact")
     run.add_argument(
         "--output-path",
@@ -172,30 +182,118 @@ def _build_agent(
 
 
 def _run(args: argparse.Namespace) -> int:
-    manifest = _subsets()[args.subset]
+    if (args.subset is None) == (args.case_path is None):
+        raise ValueError("Specify exactly one of <subset> or --case-path")
+
+    subsets = _subsets()
+    case_path = args.case_path.expanduser().resolve() if args.case_path else None
+    case_json = None
+    if case_path is not None:
+        if not case_path.is_file():
+            raise FileNotFoundError(f"case JSON does not exist: {case_path}")
+        case_json = load_case_json(case_path)
+        subset_id = _subset_for_case(case_path, case_json, subsets)
+    else:
+        subset_id = args.subset
+
+    manifest = subsets[subset_id]
     manifest_path = Path(manifest["manifest_path"])
-    subset_root = manifest_path.parent / str(manifest["case_root"])
+    subset_root = (manifest_path.parent / str(manifest["case_root"])).resolve()
     config = EndpointConfig.from_env()
+    parser_config = EndpointConfig.from_env(prefix="PARSER")
     evaluator = NeuroBenchEvaluator(
         agent_runner=_build_agent(args.agent, config),
-        parser_agent=make_json_parser(config),
+        parser_agent=make_json_parser(parser_config),
         workspace_root=PROJECT_ROOT,
+        semantic_judge=make_semantic_judge(parser_config),
+        vlm_judge=make_vlm_judge(parser_config),
     )
     output_path = args.output_path.expanduser() if args.output_path else None
     if output_path is None:
-        output_path = PROJECT_ROOT / "runs" / f"{args.subset}.json"
+        if case_path is None:
+            output_path = PROJECT_ROOT / "runs" / f"{subset_id}.json"
+        else:
+            output_path = PROJECT_ROOT / "runs" / (
+                f"{subset_id}_{case_path.parent.name}_{case_path.stem}.json"
+            )
     elif not output_path.is_absolute():
         output_path = PROJECT_ROOT / output_path
     output_path = output_path.resolve()
-    summary = evaluator.run_subset(
-        subset_root,
-        output_path=output_path,
-    )
-    print(f"subset: {args.subset}")
-    print(f"instances: {summary['instance_count']}")
-    print(f"mean_score: {summary['mean_score']}")
+    if case_path is None:
+        summary = evaluator.run_subset(
+            subset_root,
+            output_path=output_path,
+        )
+        print(f"subset: {subset_id}")
+        print(f"instances: {summary['instance_count']}")
+        print(f"mean_score: {summary['mean_score']}")
+    else:
+        result = evaluator.run_case(case_json, source_path=case_path)
+        instances = [result]
+        summary = evaluator._summarize_instances(
+            instances, float(result["timing_sec"].get("total", 0.0))
+        )
+        summary["result_file"] = str(output_path)
+        summary["planned_instance_count"] = 1
+        summary["completed_instance_count"] = 1
+        experiment = {
+            "subset": subset_id,
+            "subset_root": str(subset_root),
+            "single_case": str(case_path),
+            "started_at": result["started_at"],
+            "finished_at": result["finished_at"],
+            "models": evaluator.model_configs(),
+            "max_workers": 1,
+            "evaluation_mode": str(
+                getattr(evaluator.agent_runner, "evaluation_mode", "agent")
+            ),
+            "rerun": False,
+        }
+        if getattr(evaluator.agent_runner, "execution_mode", None) == "docker":
+            experiment["sandbox"] = evaluator._sandbox_summary(instances)
+        payload = {"experiment": experiment, "instances": instances, "summary": summary}
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = output_path.with_suffix(output_path.suffix + ".tmp")
+        temporary.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        temporary.replace(output_path)
+        print(f"subset: {subset_id}")
+        print("instances: 1")
+        print(f"mean_score: {summary['mean_score']}")
     print(f"output: {output_path.resolve()}")
     return 0
+
+
+def _subset_for_case(
+    case_path: Path,
+    case_json: dict[str, Any],
+    subsets: dict[str, dict[str, Any]],
+) -> str:
+    """Resolve a case to a released subset from its path or metadata."""
+
+    resolved_case = case_path.resolve()
+    for subset_id, manifest in subsets.items():
+        manifest_path = Path(manifest["manifest_path"])
+        subset_root = (manifest_path.parent / str(manifest["case_root"])).resolve()
+        try:
+            resolved_case.relative_to(subset_root)
+        except ValueError:
+            continue
+        return subset_id
+
+    declared = str(case_json.get("meta_info", {}).get("bench_subset", ""))
+    for subset_id, manifest in subsets.items():
+        if declared in {
+            subset_id,
+            str(manifest.get("legacy_name", "")),
+            str(manifest.get("display_name", "")),
+        }:
+            return subset_id
+    raise ValueError(
+        f"case does not belong to a released BrainBench subset: {case_path}"
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

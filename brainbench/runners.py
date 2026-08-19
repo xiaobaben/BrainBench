@@ -66,6 +66,7 @@ class CodeActAgentRunner(AgentRunner):
         run_context: Optional[Any] = None,
     ) -> AgentRunResult:
         self.last_audit = None
+        self._clear_artifact_workspace()
         if self.execution_mode == "docker":
             return self._run_docker(query, run_context)
 
@@ -124,7 +125,10 @@ class CodeActAgentRunner(AgentRunner):
                 workspace_root=self.work_dir,
                 instance_id=instance_id,
                 agent_input=agent_input,
-                allow_missing_data_path=True,
+                allow_missing_data_path=bool(
+                    isinstance(run_context, Mapping)
+                    and run_context.get("expected_missing_data_path", False)
+                ),
             )
             response, tokens = run_codeact_case_isolated(
                 query=build_agent_query(rewritten_input),
@@ -153,3 +157,12 @@ class CodeActAgentRunner(AgentRunner):
             if context is not None:
                 self.last_audit = dict(context.audit)
             cleanup_run_root(run_root)
+
+    def _clear_artifact_workspace(self) -> None:
+        """Prevent artifacts from a previous CodeAct case being reused."""
+
+        artifact_root = self.work_dir / "file_check"
+        if artifact_root.is_symlink() or artifact_root.is_file():
+            artifact_root.unlink()
+        elif artifact_root.is_dir():
+            shutil.rmtree(artifact_root)
