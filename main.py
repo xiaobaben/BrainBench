@@ -196,6 +196,9 @@ def _run(args: argparse.Namespace) -> int:
     else:
         subset_id = args.subset
 
+    if case_path is not None and args.output_path is not None:
+        raise ValueError("--output-path is only supported for a complete subset run")
+
     manifest = subsets[subset_id]
     manifest_path = Path(manifest["manifest_path"])
     subset_root = (manifest_path.parent / str(manifest["case_root"])).resolve()
@@ -208,18 +211,13 @@ def _run(args: argparse.Namespace) -> int:
         semantic_judge=make_semantic_judge(parser_config),
         vlm_judge=make_vlm_judge(parser_config),
     )
-    output_path = args.output_path.expanduser() if args.output_path else None
-    if output_path is None:
-        if case_path is None:
-            output_path = PROJECT_ROOT / "runs" / f"{subset_id}.json"
-        else:
-            output_path = PROJECT_ROOT / "runs" / (
-                f"{subset_id}_{case_path.parent.name}_{case_path.stem}.json"
-            )
-    elif not output_path.is_absolute():
-        output_path = PROJECT_ROOT / output_path
-    output_path = output_path.resolve()
     if case_path is None:
+        output_path = args.output_path.expanduser() if args.output_path else None
+        if output_path is None:
+            output_path = PROJECT_ROOT / "runs" / f"{subset_id}.json"
+        elif not output_path.is_absolute():
+            output_path = PROJECT_ROOT / output_path
+        output_path = output_path.resolve()
         summary = evaluator.run_subset(
             subset_root,
             output_path=output_path,
@@ -233,37 +231,84 @@ def _run(args: argparse.Namespace) -> int:
         summary = evaluator._summarize_instances(
             instances, float(result["timing_sec"].get("total", 0.0))
         )
-        summary["result_file"] = str(output_path)
         summary["planned_instance_count"] = 1
         summary["completed_instance_count"] = 1
-        experiment = {
-            "subset": subset_id,
-            "subset_root": str(subset_root),
-            "single_case": str(case_path),
-            "started_at": result["started_at"],
-            "finished_at": result["finished_at"],
-            "models": evaluator.model_configs(),
-            "max_workers": 1,
-            "evaluation_mode": str(
-                getattr(evaluator.agent_runner, "evaluation_mode", "agent")
-            ),
-            "rerun": False,
-        }
-        if getattr(evaluator.agent_runner, "execution_mode", None) == "docker":
-            experiment["sandbox"] = evaluator._sandbox_summary(instances)
-        payload = {"experiment": experiment, "instances": instances, "summary": summary}
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        temporary = output_path.with_suffix(output_path.suffix + ".tmp")
-        temporary.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2),
-            encoding="utf-8",
+        _print_single_case_details(
+            subset_id=subset_id,
+            case_path=case_path,
+            result=result,
+            summary=summary,
+            models=evaluator.model_configs(),
         )
-        temporary.replace(output_path)
-        print(f"subset: {subset_id}")
-        print("instances: 1")
-        print(f"mean_score: {summary['mean_score']}")
-    print(f"output: {output_path.resolve()}")
+    if case_path is None:
+        print(f"output: {output_path.resolve()}")
     return 0
+
+
+def _print_single_case_details(
+    *,
+    subset_id: str,
+    case_path: Path,
+    result: dict[str, Any],
+    summary: dict[str, Any],
+    models: dict[str, dict[str, Any]],
+) -> None:
+    """Print the diagnostic fields for a single-case evaluation."""
+
+    print("single_case:")
+    print(f"  subset: {subset_id}")
+    print(f"  case_path: {case_path}")
+    print(f"  case_id: {result.get('case_id')}")
+    print(f"  instance_id: {result.get('instance_id')}")
+    print("  models:")
+    print(json.dumps(models, ensure_ascii=False, indent=2))
+    print(
+        f"  score: {result.get('total_score', 0.0)} / "
+        f"{result.get('max_score', 0.0)}"
+    )
+    print(f"  vrr: {result.get('vrr', 0.0)}")
+
+    print("  metrics:")
+    metric_details = result.get("metric_details", {})
+    if isinstance(metric_details, dict) and metric_details:
+        for metric_id, detail in metric_details.items():
+            if not isinstance(detail, dict):
+                print(f"    {metric_id}: {detail}")
+                continue
+            print(
+                f"    {metric_id}: raw={detail.get('raw_score', 0.0)} "
+                f"weighted={detail.get('weighted_score', 0.0)} "
+                f"type={detail.get('metric_type')}"
+            )
+            if detail.get("error"):
+                print(f"      error: {detail['error']}")
+    else:
+        print("    none")
+
+    print("  agent_output:")
+    print(result.get("agent_output", ""))
+    print("  parser_output:")
+    print(json.dumps(result.get("parser_output", {}), ensure_ascii=False, indent=2))
+    print(
+        "  token_usage: "
+        + json.dumps(result.get("token_usage", {}), ensure_ascii=False, sort_keys=True)
+    )
+    print(
+        "  timing_sec: "
+        + json.dumps(result.get("timing_sec", {}), ensure_ascii=False, sort_keys=True)
+    )
+    print("  sandbox:")
+    print(json.dumps(result.get("sandbox"), ensure_ascii=False, indent=2))
+    print("  artifact_manifest:")
+    print(json.dumps(result.get("artifact_manifest", []), ensure_ascii=False, indent=2))
+    print("  errors:")
+    errors = result.get("errors", [])
+    if errors:
+        for error in errors:
+            print(f"    - {error}")
+    else:
+        print("    none")
+    print("  result_json: not saved (single-case mode)")
 
 
 def _subset_for_case(
