@@ -165,7 +165,7 @@ For a different individual subset, replace `foundational_analysis` with `sleep_a
 
 ### 5. Prepare data
 
-First, obtain the required raw datasets from the official sources listed in the [Dataset Access Guide](DATASET_GUIDE.md). For Foundational Analysis, place the five dataset folders directly under one user-selected `<data-root>`:
+First, **obtain the required raw datasets from the official sources listed in the [Dataset Access Guide](DATASET_GUIDE.md).** For Foundational Analysis, place the five dataset folders directly under one user-selected `<data-root>`:
 
 ```text
 <data-root>/
