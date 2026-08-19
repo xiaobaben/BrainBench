@@ -187,24 +187,36 @@ def prepare_case_context(
         value = agent_input.get(key)
         if not value:
             continue
-        source = Path(str(value))
-        if not source.is_absolute():
-            source = workspace_root / source
-        source = source.resolve()
-        if not any(_is_relative_to(source, root) for root in allowed_roots):
-            raise SandboxInputError(f"{key} is outside allowed input roots: {source}")
-        name = source.name
-        if name in used_names:
-            name = f"{key}_{name}"
-        used_names.add(name)
-        container_path = f"/input/{name}"
-        if not source.is_file():
-            if key != "data_path" or not allow_missing_data_path:
-                raise SandboxInputError(f"{key} does not reference an existing file: {source}")
-            rewritten[key] = container_path
-            continue
-        mounts[source] = container_path
-        rewritten[key] = container_path
+
+        # Multi cases may declare one logical input as several files (for
+        # example, an EEG file and an fNIRS file).  Validate and mount every
+        # member independently instead of stringifying the whole list into a
+        # path such as "['data/multi/a.edf', 'data/multi/b.edf']".
+        is_sequence = isinstance(value, (list, tuple))
+        values = list(value) if is_sequence else [value]
+        rewritten_values = []
+        for item in values:
+            if not isinstance(item, (str, os.PathLike)):
+                raise SandboxInputError(f"{key} must be a path or a list of paths")
+            source = Path(item)
+            if not source.is_absolute():
+                source = workspace_root / source
+            source = source.resolve()
+            if not any(_is_relative_to(source, root) for root in allowed_roots):
+                raise SandboxInputError(f"{key} is outside allowed input roots: {source}")
+            name = source.name
+            if name in used_names:
+                name = f"{key}_{name}"
+            used_names.add(name)
+            container_path = f"/input/{name}"
+            if not source.is_file():
+                if key != "data_path" or not allow_missing_data_path:
+                    raise SandboxInputError(f"{key} does not reference an existing file: {source}")
+                rewritten_values.append(container_path)
+                continue
+            mounts[source] = container_path
+            rewritten_values.append(container_path)
+        rewritten[key] = rewritten_values if is_sequence else rewritten_values[0]
     if "instruction" in rewritten:
         rewritten["instruction"] = (
             f"{rewritten.get('instruction')}\n\n"
