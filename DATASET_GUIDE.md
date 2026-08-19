@@ -10,23 +10,160 @@ The fixed evaluation case JSON files are published in the [BrainBench Hugging Fa
 
 Choose one `<data-root>` for each subset and place its required dataset folders directly underneath it. The root directory may be located anywhere on the user's system.
 
+### Foundational Analysis
+
 ```text
 <foundational-data-root>/
 ├── isruc/
+│   ├── 1/
+│   │   ├── 1.rec
+│   │   ├── 1_1.txt
+│   │   └── 1_1.xlsx
+│   ├── 2/
+│   │   ├── 2.rec
+│   │   ├── 2_1.txt
+│   │   └── 2_1.xlsx
+│   ├── 3/
+│   │   ├── 3.rec
+│   │   ├── 3_1.txt
+│   │   └── 3_1.xlsx
+│   ├── 4/
+│   │   ├── 4.rec
+│   │   ├── 4_1.txt
+│   │   └── 4_1.xlsx
+│   └── 5/
+│       ├── 5.rec
+│       ├── 5_1.txt
+│       └── 5_1.xlsx
+│
 ├── bcic2020-3/
+│   └── Training set/
+│       ├── Data_Sample01.mat
+│       ├── Data_Sample02.mat
+│       ├── Data_Sample03.mat
+│       ├── Data_Sample04.mat
+│       └── Data_Sample05.mat
+│
 ├── MentalArithmetic/
+│   └── edf/
+│       ├── Subject00_1.edf
+│       ├── Subject01_1.edf
+│       ├── Subject02_1.edf
+│       ├── Subject03_1.edf
+│       └── Subject04_1.edf
+│
 ├── mumtaz/
+│   └── files/
+│       ├── H S1 EC.edf
+│       ├── H S2 EC.edf
+│       ├── H S3 EC.edf
+│       ├── H S4 EC.edf
+│       └── H S5 EC.edf
+│
 └── seedv/
+    └── files/
+        ├── 1_1_20180804.cnt
+        ├── 2_1_20180416.cnt
+        ├── 3_1_20180414.cnt
+        ├── 4_1_20180414.cnt
+        └── 5_1_20180719.cnt
+```
+For Foundational Analysis, the preparation script reads the ISRUC `.rec` files. The corresponding `.txt` and `.xlsx` files may remain in the subject directories but are not used by this subset. Labels required by BCI Competition 2020 Track 3 are stored inside the corresponding `.mat` files.
 
-<sleep-data-root>/
-├── isruc/
-├── hmc/
-├── shhs/
-├── mass/
-└── physionet2018/
+Prepare the subset with:
+
+```bash
+python main.py prepare foundational_analysis \
+  --data-root /path/to/foundational-data-root
 ```
 
-Pass the applicable root directory directly to `--data-root`. 
+### Sleep Assessment
+
+```text
+<sleep-data-root>/
+├── isruc/
+│   ├── 1/
+│   │   ├── 1.rec
+│   │   └── 1_1.txt
+│   ├── 2/
+│   │   ├── 2.rec
+│   │   └── 2_1.txt
+│   ├── 3/
+│   │   ├── 3.rec
+│   │   └── 3_1.txt
+│   ├── 4/
+│   │   ├── 4.rec
+│   │   └── 4_1.txt
+│   └── 5/
+│       ├── 5.rec
+│       └── 5_1.txt
+│
+├── hmc/
+│   ├── SN001.edf
+│   ├── SN001_sleepscoring.edf
+│   ├── SN002.edf
+│   ├── SN002_sleepscoring.edf
+│   ├── SN003.edf
+│   ├── SN003_sleepscoring.edf
+│   ├── SN004.edf
+│   ├── SN004_sleepscoring.edf
+│   ├── SN005.edf
+│   └── SN005_sleepscoring.edf
+│
+├── mass/
+│   ├── 01-03-0001 PSG.edf
+│   ├── 01-03-0001 Base.edf
+│   ├── 01-03-0002 PSG.edf
+│   ├── 01-03-0002 Base.edf
+│   ├── 01-03-0003 PSG.edf
+│   ├── 01-03-0003 Base.edf
+│   ├── 01-03-0004 PSG.edf
+│   ├── 01-03-0004 Base.edf
+│   ├── 01-03-0005 PSG.edf
+│   └── 01-03-0005 Base.edf
+│
+├── physionet2018/
+│   ├── tr03-0005/
+│   │   ├── tr03-0005.mat
+│   │   ├── tr03-0005.hea
+│   │   └── tr03-0005.arousal
+│   ├── tr03-0029/
+│   │   ├── tr03-0029.mat
+│   │   ├── tr03-0029.hea
+│   │   └── tr03-0029.arousal
+│   ├── tr03-0052/
+│   │   ├── tr03-0052.mat
+│   │   ├── tr03-0052.hea
+│   │   └── tr03-0052.arousal
+│   ├── tr03-0061/
+│   │   ├── tr03-0061.mat
+│   │   ├── tr03-0061.hea
+│   │   └── tr03-0061.arousal
+│   └── tr03-0078/
+│       ├── tr03-0078.mat
+│       ├── tr03-0078.hea
+│       └── tr03-0078.arousal
+│
+└── shhs/
+    ├── shhs1-200001.edf
+    ├── shhs1-200001-profusion.xml
+    ├── shhs1-200002.edf
+    ├── shhs1-200002-profusion.xml
+    ├── shhs1-200003.edf
+    ├── shhs1-200003-profusion.xml
+    ├── shhs1-200004.edf
+    ├── shhs1-200004-profusion.xml
+    ├── shhs1-200005.edf
+    └── shhs1-200005-profusion.xml
+```
+
+Prepare the subset with:
+
+```bash
+python main.py prepare sleep_assessment \
+  --data-root /path/to/sleep-data-root
+```
+
 
 ## Foundational Analysis
 
