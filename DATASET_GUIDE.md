@@ -36,7 +36,7 @@ The current preparation script uses five records from each source dataset and wr
 |---|---|---|---|
 | ISRUC-Sleep | [ISRUC-Sleep](https://sleeptight.isr.uc.pt/) | Subjects 1–5 (`1/1.rec` … `5/5.rec`) | `isruc/` |
 | BCI Competition 2020 Track 3 | [Competition page](https://brain.korea.ac.kr/bci2020/competition.php) · [OSF repository](https://osf.io/pq7vb/) | `Data_Sample01.mat` … `Data_Sample05.mat` | `bcic2020-3/` |
-| EEG During Mental Arithmetic Tasks | [PhysioNet EEGMAT](https://physionet.org/content/eegmat/1.0.0/) | `Subject01_1.edf` … `Subject05_1.edf` | `MentalArithmetic/` |
+| EEG During Mental Arithmetic Tasks | [PhysioNet EEGMAT](https://physionet.org/content/eegmat/1.0.0/) | `Subject00_1.edf` … `Subject04_1.edf` | `MentalArithmetic/` |
 | Mumtaz 2016 EEG | [Figshare EEG Data New](https://figshare.com/articles/dataset/EEG_Data_New/4244171) | `H S1 EC.edf` … `H S5 EC.edf` | `mumtaz/` |
 | SEED-V | [SJTU BCMI SEED portal](https://bcmi.sjtu.edu.cn/home/seed/) | Recordings `1_1_20180804.cnt`, `2_1_20180416.cnt`, `3_1_20180414.cnt`, `4_1_20180414.cnt`, `5_1_20180719.cnt` | `seedv/` |
 
