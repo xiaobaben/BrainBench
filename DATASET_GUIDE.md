@@ -52,6 +52,19 @@ The current preparation script uses five records from each source dataset and wr
 | Montreal Archive of Sleep Studies (MASS) | [MASS access page](http://www.ceams-carsm.ca/en/MASS) | `01-03-0001` … `01-03-0005` | `mass/` |
 | PhysioNet/CinC Challenge 2018 | [PhysioNet Challenge 2018](https://physionet.org/content/challenge-2018/1.0.0/) | `tr03-0005`, `tr03-0029`, `tr03-0052`, `tr03-0061`, `tr03-0078` | `physionet2018/` |
 
+## Neurocognitive Assessment
+
+The current preparation script uses five records from each source dataset and writes standardized files to `data/emotion/`.
+
+| Dataset | Official access | Records used by BrainBench | Local folder |
+| --- | --- | --- | --- |
+| FACED | [FACED](https://www.synapse.org/Synapse:syn50614194/files/) | `sub000.pkl` … `sub004.pkl` | `FACED/` |
+| REFED | [REFED](https://huggingface.co/datasets/REFED2025/REFED-dataset) | Subjects `1` … `5` (`data/1/EEG_videos.mat` … `data/5/EEG_videos.mat`) | `REFED/` |
+| COG-BCI | [COG-BCI](https://zenodo.org/records/6874129) | `sub-01.zip` ...`sub-05.zip` | `COG-BCI/` |
+| MPD-DF | [MPD-DF](https://figshare.com/articles/dataset/MPD-DF_Multimodal_Phenotyping_Dataset_of_Driving_Fatigue_--_The_Raw_Dataset_and_Questionnaire_Information/28455737) | `MPDDF_raw_01_*`, `MPDDF_raw_02_*`, `MPDDF_raw_03_*`, `MPDDF_raw_04_*`, `MPDDF_raw_06_*` (Annotation,EEG,PSG) | `MPD-DF/` |
+
+## Important notes
+
 ## Important notes
 
 - Do not rename the local folders or the source files expected by the preparation scripts.
