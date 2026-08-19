@@ -13,17 +13,17 @@
 </p>
 
 <p align="center">
-  <a href="#">&#128196; ArXiv Paper</a>
+  <a href="https://arxiv.org/abs/2608.04156">&#128196; ArXiv Paper</a>
   &nbsp;|&nbsp;
-  <a href="#">&#127760; Website</a>
+  <a href="https://ceceliawai.github.io/BrainBenchWebsite/">&#127760; Website</a>
   &nbsp;|&nbsp;
-  <a href="#">&#129303; Hugging Face</a>
+  <a href="https://huggingface.co/datasets/xbb083/BrainBench">&#129303; Hugging Face</a>
   &nbsp;|&nbsp;
   <a href="#quickstart">&#128640; Quickstart</a>
   &nbsp;|&nbsp;
   <a href="#agents">&#129302; Agent</a>
   &nbsp;|&nbsp;
-  <a href="#">&#128218; Citation</a>
+  <a href="#citation">&#128218; Citation</a>
 </p>
 <hr>
 
@@ -260,3 +260,16 @@ The result JSON is updated after every completed instance and contains:
 - **`summary`**: planned and completed instances, aggregate score, failure categories, metric summaries, token usage, and wall-clock timing.
 
 <hr>
+
+<h2 id="citation">&#128218; Citation</h2>
+
+If you use BrainBench in your research, please cite:
+
+```bibtex
+@article{zhou2026brainbench,
+  title={BrainBench: Benchmarking Large Language Models for Comprehensive EEG Understanding},
+  author={Zhou, Yangxuan and Zhao, Sha and Chen, Yuning and Wu, Chen and Wang, Jiquan and Li, Shijian and Pan, Gang},
+  journal={arXiv preprint arXiv:2608.04156},
+  year={2026}
+}
+```
