@@ -252,6 +252,12 @@ Run the evaluation with:
 python main.py run foundational_analysis --agent custom
 ```
 
+```bash
+python main.py run \
+  --case-path benchmarks/foundational_analysis/cases/case1/case1_01.json \
+  --agent custom
+```
+
 <hr>
 
 <h2 id="audit-and-logs">&#128203; Audit and logs</h2>
