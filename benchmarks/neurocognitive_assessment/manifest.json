@@ -1,8 +1,11 @@
 {
   "subset_id": "neurocognitive_assessment",
   "display_name": "Neurocognitive Assessment",
-  "status": "in_progress",
+  "status": "released",
+  "legacy_name": "NeuroBench-Emotion",
   "case_root": "cases",
-  "expected_tasks": null,
-  "expected_instances": null
+  "prepare_script": "prepare_emotion_test_inputs.py",
+  "prepared_data_root": "data/emotion",
+  "expected_tasks": 50,
+  "expected_instances": 1035
 }

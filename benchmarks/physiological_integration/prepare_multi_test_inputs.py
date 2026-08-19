@@ -35,17 +35,10 @@ from scipy.io import loadmat
 
 
 SCRIPT_PATH = Path(__file__).resolve()
-# This file is distributed under ``outputs/multi_agent/NeuroBench-Multi``.
-# Generated data belong to the output bundle, while the Sleep source and
-# standardized SHHS reference remain in the containing NeuroBench checkout.
-OUTPUT_BUNDLE_ROOT = SCRIPT_PATH.parents[1]
-SOURCE_PROJECT_ROOT = SCRIPT_PATH.parents[3]
-DEFAULT_SOURCE_ROOT = Path("/data/cyn/EEG_data")
+PROJECT_ROOT = SCRIPT_PATH.parents[2]
 # ``data/multi`` is the only persistent public-data root.  Per-case inputs
 # belong in the evaluator runtime, never under this directory.
-DEFAULT_OUTPUT_DIR = OUTPUT_BUNDLE_ROOT / "data" / "multi"
-DEFAULT_SHHS_DIR = SOURCE_PROJECT_ROOT / "data" / "sleep" / "original" / "shhs"
-DEFAULT_SLEEP_STANDARD_DIR = SOURCE_PROJECT_ROOT / "data" / "sleep"
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "multi"
 
 DATASET_ORDER = ("DEAP", "SEED-VIG", "SEED-VII", "SHHS", "simultaneous")
 DEFAULT_SUBJECTS = (1, 2, 3, 4, 5)
@@ -235,19 +228,6 @@ def parse_datasets(raw: Sequence[str]) -> List[str]:
     return selected or list(DATASET_ORDER)
 
 
-def parse_subjects(raw: Sequence[str]) -> List[int]:
-    subjects: List[int] = []
-    for item in raw:
-        value = int(item)
-        if value <= 0:
-            raise ValueError(f"Subject id must be positive: {item}")
-        if value not in subjects:
-            subjects.append(value)
-    if not subjects:
-        raise ValueError("At least one subject is required")
-    return subjects
-
-
 def write_edf_mixed(
     path: Path,
     channels: Sequence[Tuple[str, np.ndarray, float, str]],
@@ -420,41 +400,33 @@ def parse_shhs_labels(xml_path: Path) -> np.ndarray:
 
 def process_shhs(
     source_dir: Path,
-    sleep_standard_dir: Path,
     ctx: BuildContext,
     subjects: Sequence[int],
 ) -> None:
     require_dir(source_dir, "SHHS raw")
-    require_dir(sleep_standard_dir, "Sleep standard data")
     for subject in subjects:
-        if subject > 5:
-            raise ValueError("The shared Sleep SHHS profile contains subjects 1 through 5 only")
         sid = f"{subject:02d}"
         source_id = 200000 + subject
         source_edf = source_dir / f"shhs1-{source_id}.edf"
         source_xml = source_dir / f"shhs1-{source_id}-profusion.xml"
-        reference_edf = sleep_standard_dir / f"SHHS1_{sid}.edf"
-        reference_npy = sleep_standard_dir / f"SHHS1_{sid}.npy"
         for path, label in (
             (source_edf, "SHHS EDF"),
             (source_xml, "SHHS Profusion XML"),
-            (reference_edf, "Sleep reference EDF"),
-            (reference_npy, "Sleep reference NPY"),
         ):
             require_file(path, label)
         out_edf = ctx.add(
             dataset="SHHS",
             role="signal",
             name=f"SHHS1_{sid}.edf",
-            sources=[source_edf, reference_edf],
-            status="copied_sleep_standard",
+            sources=[source_edf],
+            status="copied",
         )
         out_npy = ctx.add(
             dataset="SHHS",
             role="labels",
             name=f"SHHS1_{sid}.npy",
-            sources=[source_xml, reference_npy],
-            status="xml_to_npy_sleep_standard",
+            sources=[source_xml],
+            status="xml_to_npy",
             schema="sleep_stage_labels",
             metadata={"epoch_duration_sec": 30.0, "stage_ids": [0, 1, 2, 3, 4]},
         )
@@ -463,12 +435,6 @@ def process_shhs(
         copy_binary(source_edf, out_edf)
         labels = parse_shhs_labels(source_xml)
         save_numeric_npy(out_npy, labels)
-        if sha256_file(out_edf) != sha256_file(reference_edf):
-            raise RuntimeError(f"SHHS EDF differs from Sleep standard: {sid}")
-        expected = np.load(reference_npy, allow_pickle=False)
-        actual = np.load(out_npy, allow_pickle=False)
-        if actual.dtype != expected.dtype or actual.shape != expected.shape or not np.array_equal(actual, expected):
-            raise RuntimeError(f"SHHS labels differ from Sleep standard: {sid}")
 
 
 def cnt_annotations(path: Path) -> Tuple[np.ndarray, np.ndarray, float, float]:
@@ -1104,17 +1070,17 @@ def process_simultaneous(
     subjects: Sequence[int],
     session_policy: str,
 ) -> None:
-    raw_dir = source_dir / "raw"
-    fnirs_root = raw_dir / "fNIRS"
-    require_dir(raw_dir, "simultaneous EEG raw")
-    require_dir(fnirs_root, "simultaneous fNIRS raw")
+    eeg_root = source_dir / "EEG"
+    nirs_root = source_dir / "NIRS"
+    require_dir(eeg_root, "simultaneous EEG archives")
+    require_dir(nirs_root, "simultaneous NIRS archives")
     with tempfile.TemporaryDirectory(prefix="neurobench-multi-sim-") as temp_name:
         temp_root = Path(temp_name)
         for subject in subjects:
             sid = f"{subject:02d}"
             vp = f"VP{subject:03d}"
-            eeg_zip = raw_dir / f"{vp}.zip"
-            fnirs_zip = fnirs_root / f"{vp}.zip"
+            eeg_zip = eeg_root / f"{vp}.zip"
+            fnirs_zip = nirs_root / f"{vp}.zip"
             require_file(eeg_zip, f"simultaneous EEG ZIP for {vp}")
             require_file(fnirs_zip, f"simultaneous fNIRS ZIP for {vp}")
             eeg_members = select_sessions(
@@ -1345,66 +1311,9 @@ def validate_outputs(ctx: BuildContext) -> List[Dict[str, Any]]:
     return records
 
 
-def write_manifest(
-    root: Path,
-    records: Sequence[Mapping[str, Any]],
-    datasets: Sequence[str],
-    subjects: Sequence[int],
-    session_policy: str,
-) -> Dict[str, Any]:
-    # Build an explicit recording index so case builders can resolve public
-    # sources without scanning filenames or relying on per-case sidecars.
-    by_recording: Dict[Tuple[str, str], Dict[str, Any]] = {}
-    for record in records:
-        dataset = str(record["dataset"])
-        name = str(record["output_path"])
-        if dataset == "DEAP":
-            recording_id = Path(name).stem
-        elif dataset == "SEED-VIG":
-            recording_id = Path(name).stem
-        elif dataset == "SEED-VII":
-            recording_id = Path(name).stem
-            for suffix in ("_EEG", "_EyeTracking", "_continuous", "_events"):
-                if recording_id.endswith(suffix):
-                    recording_id = recording_id[: -len(suffix)]
-                    break
-        elif dataset == "SHHS":
-            recording_id = Path(name).stem
-        elif dataset == "simultaneous":
-            recording_id = re.sub(r"_(EEG|fNIRS)$", "", Path(name).stem)
-        else:
-            raise ValueError(f"Unexpected standardized dataset in manifest: {dataset}")
-        item = by_recording.setdefault((dataset, recording_id), {"recording_id": recording_id, "dataset": dataset, "artifacts": []})
-        item["artifacts"].append({
-            "role": record["role"], "path": name, "format": record["format"],
-            "schema": record.get("schema"), "metadata": record.get("metadata", {}),
-            "structure": record.get("structure", {}), "sha256": record["sha256"],
-        })
-    payload = {
-        "schema_version": 4,
-        "generated_by": "NeuroBench-Multi/preprocess_multi_data.py",
-        "layout": "flat",
-        "signal_formats": ["edf", "cnt", "bdf"],
-        "sidecar_format": "numeric_npy_allow_pickle_false",
-        "datasets": list(datasets),
-        "subjects": [f"{value:02d}" for value in subjects],
-        "session_policy": session_policy,
-        "emotion_ids": EMOTION_IDS,
-        "npy_schemas": NPY_SCHEMAS,
-        "entry_count": len(records),
-        "entries": list(records),
-        "recordings": [by_recording[key] for key in sorted(by_recording)],
-    }
-    (root / "manifest.json").write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    return payload
-
-
 def run_processors(
     ctx: BuildContext,
     source_dirs: Mapping[str, Path],
-    sleep_standard_dir: Path,
     datasets: Sequence[str],
     subjects: Sequence[int],
     session_policy: str,
@@ -1416,7 +1325,7 @@ def run_processors(
     if "SEED-VII" in datasets:
         process_seed_vii(source_dirs["SEED-VII"], ctx, subjects, session_policy)
     if "SHHS" in datasets:
-        process_shhs(source_dirs["SHHS"], sleep_standard_dir, ctx, subjects)
+        process_shhs(source_dirs["SHHS"], ctx, subjects)
     if "simultaneous" in datasets:
         process_simultaneous(source_dirs["simultaneous"], ctx, subjects, session_policy)
 
@@ -1452,7 +1361,7 @@ def verify_against(output_dir: Path, reference_dir: Path, records: Sequence[Mapp
             left = np.load(actual, allow_pickle=False)
             right = np.load(expected, allow_pickle=False)
             matched = left.dtype == right.dtype and left.shape == right.shape and np.array_equal(left, right)
-        elif record["conversion_status"] in {"copied", "copied_sleep_standard"}:
+        elif record["conversion_status"] == "copied":
             matched = sha256_file(actual) == sha256_file(expected)
         else:
             matched = signal_summary(actual) == signal_summary(expected)
@@ -1464,24 +1373,22 @@ def verify_against(output_dir: Path, reference_dir: Path, records: Sequence[Mapp
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Prepare flat, MAT-free NeuroBench-Multi benchmark inputs."
+        description="Prepare BrainBench Physiological Integration inputs."
     )
-    parser.add_argument("--source-root", type=Path, default=DEFAULT_SOURCE_ROOT)
-    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--deap-dir", type=Path)
-    parser.add_argument("--seed-vig-dir", type=Path)
-    parser.add_argument("--seed-vii-dir", type=Path)
-    parser.add_argument("--shhs-dir", type=Path, default=DEFAULT_SHHS_DIR)
-    parser.add_argument("--simultaneous-dir", type=Path)
-    parser.add_argument("--sleep-standard-dir", type=Path, default=DEFAULT_SLEEP_STANDARD_DIR)
+    parser.add_argument(
+        "--data-root",
+        type=Path,
+        required=True,
+        help=(
+            "Directory containing DEAP, SEED-VIG, SEED-VII, SHHS, and "
+            "simultaneous_EEG-NIRS subdirectories."
+        ),
+    )
     parser.add_argument(
         "--datasets",
         nargs="*",
         default=list(DATASET_ORDER),
         help="Space- or comma-separated subset of DEAP, SEED-VIG, SEED-VII, SHHS, simultaneous.",
-    )
-    parser.add_argument(
-        "--subjects", nargs="*", default=[str(value) for value in DEFAULT_SUBJECTS]
     )
     parser.add_argument("--session-policy", choices=("first", "all"), default="first")
     parser.add_argument("--overwrite", action="store_true")
@@ -1503,27 +1410,23 @@ def print_report(report: Mapping[str, Any], print_json: bool) -> None:
         print(f"{dataset}\tentries={count}")
 
 
-def main(argv: Optional[Sequence[str]] = None) -> None:
+def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    source_root = resolved(args.source_root)
+    source_root = resolved(args.data_root)
     datasets = parse_datasets(args.datasets)
-    subjects = parse_subjects(args.subjects)
-    output_dir = resolved(args.output_dir)
+    subjects = list(DEFAULT_SUBJECTS)
+    output_dir = DEFAULT_OUTPUT_DIR.resolve()
     source_dirs = {
-        "DEAP": resolved(args.deap_dir or source_root / "DEAP"),
-        "SEED-VIG": resolved(args.seed_vig_dir or source_root / "SEED-VIG"),
-        "SEED-VII": resolved(args.seed_vii_dir or source_root / "SEED-VII"),
-        "SHHS": resolved(args.shhs_dir),
-        "simultaneous": resolved(
-            args.simultaneous_dir or source_root / "simultaneous_EEG-NIRS"
-        ),
+        "DEAP": resolved(source_root / "DEAP"),
+        "SEED-VIG": resolved(source_root / "SEED-VIG"),
+        "SEED-VII": resolved(source_root / "SEED-VII"),
+        "SHHS": resolved(source_root / "SHHS"),
+        "simultaneous": resolved(source_root / "simultaneous_EEG-NIRS"),
     }
-    sleep_standard_dir = resolved(args.sleep_standard_dir)
     planned = BuildContext(root=output_dir, dry_run=True)
     run_processors(
         planned,
         source_dirs,
-        sleep_standard_dir,
         datasets,
         subjects,
         args.session_policy,
@@ -1540,7 +1443,7 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
             "planned_outputs": [item.output_path.name for item in planned.artifacts],
         }
         print_report(report, args.print_json)
-        return
+        return 0
     if output_dir.exists() and not args.overwrite:
         raise FileExistsError(f"Output exists: {output_dir}. Rerun with --overwrite.")
     output_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -1553,17 +1456,13 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         run_processors(
             ctx,
             source_dirs,
-            sleep_standard_dir,
             datasets,
             subjects,
             args.session_policy,
         )
         records = validate_outputs(ctx)
-        manifest = write_manifest(
-            staging, records, datasets, subjects, args.session_policy
-        )
-        if manifest["entry_count"] != len(ctx.artifacts):
-            raise RuntimeError("Manifest entry count does not match generated artifacts")
+        if len(records) != len(ctx.artifacts):
+            raise RuntimeError("Validated output count does not match generated artifacts")
         commit_staging(staging, output_dir, args.overwrite)
         committed = True
     finally:
@@ -1577,11 +1476,11 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
         "output_dir": str(output_dir),
         "entry_count": len(records),
         "dataset_entry_counts": counts,
-        "manifest": str(output_dir / "manifest.json"),
         "verification": verification,
     }
     print_report(report, args.print_json)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

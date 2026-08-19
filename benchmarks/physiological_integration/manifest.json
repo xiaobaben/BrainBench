@@ -1,8 +1,11 @@
 {
   "subset_id": "physiological_integration",
   "display_name": "Physiological Integration",
-  "status": "in_progress",
+  "status": "released",
+  "legacy_name": "NeuroBench-Multi",
   "case_root": "cases",
-  "expected_tasks": null,
-  "expected_instances": null
+  "prepare_script": "prepare_multi_test_inputs.py",
+  "prepared_data_root": "data/multi",
+  "expected_tasks": 39,
+  "expected_instances": 1095
 }

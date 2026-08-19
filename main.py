@@ -126,8 +126,18 @@ def _prepare(args: argparse.Namespace) -> int:
 
     if args.subset == "foundational_analysis":
         from benchmarks.foundational_analysis.prepare_core_test_inputs import main as prepare
-    else:
+    elif args.subset == "sleep_assessment":
         from benchmarks.sleep_assessment.prepare_sleep_test_inputs import main as prepare
+    elif args.subset == "neurocognitive_assessment":
+        from benchmarks.neurocognitive_assessment.prepare_emotion_test_inputs import (
+            main as prepare,
+        )
+    elif args.subset == "physiological_integration":
+        from benchmarks.physiological_integration.prepare_multi_test_inputs import (
+            main as prepare,
+        )
+    else:
+        raise ValueError(f"Unsupported subset: {args.subset}")
     return int(prepare(forwarded))
 
 
